@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from groups.serializers import GroupSerializer
 
 
 class PetSerializer(serializers.Serializer):
@@ -7,5 +8,5 @@ class PetSerializer(serializers.Serializer):
     age = serializers.IntegerField()
     weight = serializers.FloatField()
     sex = serializers.CharField()
-    #group = GroupSerializer(many=True)
+    group = GroupSerializer(many=True)
     #traits = treitsSerializer(many=True)
