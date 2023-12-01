@@ -9,5 +9,5 @@ class PetSerializer(serializers.Serializer):
     age = serializers.IntegerField()
     weight = serializers.FloatField()
     sex = serializers.CharField()
-    group = GroupSerializer(many=True)
+    group = GroupSerializer()
     traits = TraitSerializer(many=True)
