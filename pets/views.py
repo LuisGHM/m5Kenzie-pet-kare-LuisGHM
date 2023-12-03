@@ -49,6 +49,16 @@ class petIdView(APIView):
         try:
             pet = Pet.objects.get(id=pet_id)
         except:
-            return Response({"message": "Pet not found"}, status.HTTP_404_NOT_FOUND) 
+            return Response({"detail": "Not found."}, status.HTTP_404_NOT_FOUND) 
         serializer_pet = PetSerializer(pet)
         return Response(serializer_pet.data)
+    
+    
+    def delete(self, request: Request, pet_id: int) -> Response:
+        try:
+            pet = Pet.objects.get(id=pet_id)
+        except:
+            return Response({"detail": "Not found."}, status.HTTP_404_NOT_FOUND)
+        
+        pet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT) 
