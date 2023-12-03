@@ -12,4 +12,4 @@ class Pet(models.Model):
     age = models.IntegerField()
     weight = models.FloatField()
     sex = models.CharField(max_length=20, choices=SexOpt.choices, default=SexOpt.NotInformed)
-    group = models.ForeignKey("groups.Group", on_delete=models.CASCADE, related_name="pets")
+    group = models.ForeignKey("groups.Group", on_delete=models.PROTECT, related_name="pets")

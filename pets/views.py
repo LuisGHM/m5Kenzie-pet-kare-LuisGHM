@@ -80,24 +80,26 @@ class petIdView(APIView):
 
         group_data = serializer_request.validated_data.pop("group", None)
         trait_data_list = serializer_request.validated_data.pop("traits", None)
-
-        new_traits = []
-        for trait_data in trait_data_list:
+        
+        if trait_data_list != None:
+            new_traits = []
+            for trait_data in trait_data_list:
+                try:
+                    trait = Trait.objects.get(name__iexact=trait_data["name"])
+                    new_traits.append(trait)
+                except Trait.DoesNotExist:
+                    new_trait = Trait.objects.create(**trait_data)
+                    new_traits.append(new_trait)
+            pet.traits.set(new_traits)
+        
+        if group_data != None:
             try:
-                trait = Trait.objects.get(name__iexact=trait_data["name"])
-                new_traits.append(trait)
-            except Trait.DoesNotExist:
-                new_trait = Trait.objects.create(**trait_data)
-                new_traits.append(new_trait)
+                group = Group.objects.get(scientific_name__exact=group_data["scientific_name"])
+            except Group.DoesNotExist:
+                group = Group.objects.create(**group_data)
+            pet.group = group
 
-        try:
-            group = Group.objects.get(scientific_name__exact=group_data["scientific_name"])
-        except Group.DoesNotExist:
-            group = Group.objects.create(**group_data)
-
-        pet.group = group
-
-        pet.traits.set(new_traits)
+        
 
         for key, value in serializer_request.validated_data.items():
             setattr(pet, key, value)
