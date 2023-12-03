@@ -43,6 +43,19 @@ class PetView(APIView, PageNumberPagination):
         
         return self.get_paginated_response(serializer_pet.data)
     
+    
+    def get(self, request: Request) -> Response:
+        trait = request.query_params.get("trait")
+
+        if trait:
+            pets = Pet.objects.filter(traits__name=trait)
+        else:
+            pets = Pet.objects.all()
+
+        result_page = self.paginate_queryset(pets, request)
+        pets_serializer = PetSerializer(result_page, many=True)
+
+        return self.get_paginated_response(pets_serializer.data)
 
 
 class petIdView(APIView):
@@ -65,8 +78,8 @@ class petIdView(APIView):
         if not serializer_request.is_valid():
             return Response(serializer_request.errors, status.HTTP_400_BAD_REQUEST)
 
-        group_data = serializer_request.validated_data.pop("group")
-        trait_data_list = serializer_request.validated_data.pop("traits")
+        group_data = serializer_request.validated_data.pop("group", None)
+        trait_data_list = serializer_request.validated_data.pop("traits", None)
 
         new_traits = []
         for trait_data in trait_data_list:
