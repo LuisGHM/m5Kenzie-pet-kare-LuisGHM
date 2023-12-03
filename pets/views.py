@@ -3,8 +3,9 @@ from .serializers import PetSerializer
 from .models import Pet
 from groups.models import Group
 from traits.models import Trait
+from rest_framework.pagination import PageNumberPagination
 
-class PetView(APIView):
+class PetView(APIView, PageNumberPagination):
     
     def post(self, request: Request) -> Response:
         serializer = PetSerializer(data=request.data)
@@ -17,14 +18,14 @@ class PetView(APIView):
         new_traits = []
         for trait_data in trait_data_list:
             try:
-                trait = Trait.objects.get(name__iexact=trait_data["name"].lower())
+                trait = Trait.objects.get(name__iexact=trait_data["name"])
                 new_traits.append(trait)
             except Trait.DoesNotExist:
-                new_trait = Trait.objects.create(**trait_data.lower())
+                new_trait = Trait.objects.create(**trait_data)
                 new_traits.append(new_trait)
         
         try:
-            group = Group.objects.get(scientific_name__iexact=group_data["scientific_name"])
+            group = Group.objects.get(scientific_name__exact=group_data["scientific_name"])
         except Group.DoesNotExist:
             group = Group.objects.create(**group_data)
         
@@ -33,3 +34,21 @@ class PetView(APIView):
         
         serializer = PetSerializer(new_pet)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    
+    def get(self, request: Request) -> Response:
+        pets = Pet.objects.all()
+        result_page = self.paginate_queryset(pets, request)
+        serializer_pet = PetSerializer(result_page, many=True)
+        
+        return self.get_paginated_response(serializer_pet.data)
+
+
+class petIdView(APIView):
+    def get(self, request: Request, pet_id: int) -> Response:
+        try:
+            pet = Pet.objects.get(id=pet_id)
+        except:
+            return Response({"message": "Pet not found"}, status.HTTP_404_NOT_FOUND) 
+        serializer_pet = PetSerializer(pet)
+        return Response(serializer_pet.data)
